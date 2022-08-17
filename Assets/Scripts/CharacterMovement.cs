@@ -30,10 +30,13 @@ public class CharacterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        RaycastHit hit;
-        if(Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit))
+        if (Input.GetMouseButtonDown(1))
         {
-            SetDestination(hit.point);
+            RaycastHit hit;
+            if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit))
+            {
+                SetDestination(hit.point);
+            }
         }
 
         Move();
@@ -50,7 +53,6 @@ public class CharacterMovement : MonoBehaviour
     {
         if (isMove)
         {
-            Debug.Log("SetBool(isMove)");
             var dir = destination - transform.position;
             transform.position += dir.normalized * Time.deltaTime * speed;
         }
