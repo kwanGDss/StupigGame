@@ -1,24 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class CharacterMovement : MonoBehaviour
 {
     private Camera camera;
     private Animator animator;
+    private NavMeshAgent agent;
 
     private bool isMove;
-    private Vector3 destination;
-    private float speed;
-    private float minDistance;
 
     void Awake()
     {
         camera = Camera.main;
-        animator = GetComponent<Animator>();
+        animator = GetComponentInChildren<Animator>();
+        agent = GetComponent<NavMeshAgent>();
 
-        speed = 5f;
-        minDistance = 0.1f;
+        agent.updateRotation = false;
     }
 
     // Start is called before the first frame update
@@ -30,7 +29,7 @@ public class CharacterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButton(1))
         {
             RaycastHit hit;
             if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit))
@@ -39,28 +38,30 @@ public class CharacterMovement : MonoBehaviour
             }
         }
 
-        Move();
+        LookMoveDireciton();
     }
 
     private void SetDestination(Vector3 dest)
     {
-        destination = dest;
+        Debug.Log("SetDestination");
+        agent.SetDestination(dest);
         isMove = true;
         animator.SetBool("isMove", true);
     }
 
-    private void Move()
+    private void LookMoveDireciton()
     {
         if (isMove)
         {
-            var dir = destination - transform.position;
-            transform.position += dir.normalized * Time.deltaTime * speed;
-        }
+            if (agent.velocity.magnitude == 0f)
+            {
+                isMove = false;
+                animator.SetBool("isMove", false);
+                return;
+            }
 
-        if(Vector3.Distance(transform.position, destination) <= minDistance)
-        {
-            isMove = false;
-            animator.SetBool("isMove", false);
+            var dir = new Vector3(agent.steeringTarget.x, transform.position.y, agent.steeringTarget.z) - transform.position;
+            animator.transform.forward = dir;
         }
     }
 }
