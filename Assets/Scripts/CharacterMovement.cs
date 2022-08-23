@@ -10,6 +10,7 @@ public class CharacterMovement : MonoBehaviour
     private NavMeshAgent agent;
 
     private bool isMove;
+    private bool isAttacking;
 
     void Awake()
     {
@@ -33,17 +34,23 @@ public class CharacterMovement : MonoBehaviour
         {
             RaycastHit hit;
             if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit))
-            {
+            {   
                 SetDestination(hit.point);
             }
         }
 
+        if (Input.GetMouseButtonDown(0))
+        {
+            isAttacking = true;
+            animator.SetBool("isAttacking", true);
+        }
+
         LookMoveDireciton();
+        Attack();
     }
 
     private void SetDestination(Vector3 dest)
     {
-        Debug.Log("SetDestination");
         agent.SetDestination(dest);
         isMove = true;
         animator.SetBool("isMove", true);
@@ -62,6 +69,20 @@ public class CharacterMovement : MonoBehaviour
 
             var dir = new Vector3(agent.steeringTarget.x, transform.position.y, agent.steeringTarget.z) - transform.position;
             animator.transform.forward = dir;
+        }
+    }
+
+    private void Attack()
+    {
+        if (isAttacking)
+        {
+            if (animator.GetCurrentAnimatorStateInfo(1).IsName("PunchLeft") &&
+                animator.GetCurrentAnimatorStateInfo(1).normalizedTime <= 1f)
+            {
+                Debug.Log("attacking");
+                isAttacking= false;
+                animator.SetBool("isAttacking", false);
+            }
         }
     }
 }
