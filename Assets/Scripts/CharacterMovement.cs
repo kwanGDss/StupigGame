@@ -76,7 +76,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (isAttacking)
         {
-            if (animator.GetCurrentAnimatorStateInfo(1).IsName("PunchLeft") &&
+            if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch1") &&
                 animator.GetCurrentAnimatorStateInfo(1).normalizedTime <= 1f)
             {
                 Debug.Log("attacking");
