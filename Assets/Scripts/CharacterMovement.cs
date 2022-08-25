@@ -11,6 +11,7 @@ public class CharacterMovement : MonoBehaviour
 
     private bool isMove;
     private bool isAttacking;
+    private bool isComboAttacking;
 
     void Awake()
     {
@@ -34,19 +35,14 @@ public class CharacterMovement : MonoBehaviour
         {
             RaycastHit hit;
             if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit))
-            {   
+            {
                 SetDestination(hit.point);
             }
         }
 
-        if (Input.GetMouseButtonDown(0))
-        {
-            isAttacking = true;
-            animator.SetBool("isAttacking", true);
-        }
-
         LookMoveDireciton();
         Attack();
+        ComboAttack();
     }
 
     private void SetDestination(Vector3 dest)
@@ -65,7 +61,7 @@ public class CharacterMovement : MonoBehaviour
                 isMove = false;
                 animator.SetBool("isMove", false);
                 return;
-            }
+            } 
 
             var dir = new Vector3(agent.steeringTarget.x, transform.position.y, agent.steeringTarget.z) - transform.position;
             animator.transform.forward = dir;
@@ -74,15 +70,44 @@ public class CharacterMovement : MonoBehaviour
 
     private void Attack()
     {
-        if (isAttacking)
+        if (Input.GetMouseButtonDown(0))
         {
-            if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch1") &&
-                animator.GetCurrentAnimatorStateInfo(1).normalizedTime <= 1f)
-            {
-                Debug.Log("attacking");
-                isAttacking= false;
-                animator.SetBool("isAttacking", false);
-            }
+            Debug.Log("Attacking");
+            isAttacking = true;
+            animator.SetBool("isAttacking", true);
+        }
+
+        if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch1") &&
+            animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.9f)
+        {
+            Debug.Log("Attack_End");
+            isAttacking = false;
+            isComboAttacking = false;
+            animator.SetBool("isAttacking", false);
+            animator.SetBool("isComboAttacking", false);
+        }
+    }
+
+    private void ComboAttack()
+    {
+        if (Input.GetMouseButtonDown(0) &&
+            animator.GetCurrentAnimatorStateInfo(1).IsName("Punch1") &&
+            animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.1f &&
+            animator.GetCurrentAnimatorStateInfo(1).normalizedTime <= 0.9f)
+        {
+            Debug.Log("ComboAttacking");
+            isComboAttacking = true;
+            animator.SetBool("isComboAttacking", true);
+        }
+
+        if(animator.GetCurrentAnimatorStateInfo(1).IsName("Punch2") &&
+            animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.9f)
+        {
+            Debug.Log("ComboAttack_End");
+            isAttacking = false;
+            isComboAttacking = false;
+            animator.SetBool("isAttacking", false);
+            animator.SetBool("isComboAttacking", false);
         }
     }
 }
