@@ -12,6 +12,7 @@ public class CharacterMovement : MonoBehaviour
     private bool isMove;
     private bool isAttacking;
     private bool isComboAttacking;
+    private float playerRotationSpeed;
 
     void Awake()
     {
@@ -20,6 +21,7 @@ public class CharacterMovement : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
 
         agent.updateRotation = false;
+        playerRotationSpeed = 10f;
     }
 
     // Start is called before the first frame update
@@ -61,10 +63,10 @@ public class CharacterMovement : MonoBehaviour
                 isMove = false;
                 animator.SetBool("isMove", false);
                 return;
-            } 
+            }
 
             var dir = new Vector3(agent.steeringTarget.x, transform.position.y, agent.steeringTarget.z) - transform.position;
-            animator.transform.forward = dir;
+            animator.transform.rotation = Quaternion.Lerp(animator.transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * playerRotationSpeed);
         }
     }
 
@@ -100,7 +102,7 @@ public class CharacterMovement : MonoBehaviour
             animator.SetBool("isComboAttacking", true);
         }
 
-        if(animator.GetCurrentAnimatorStateInfo(1).IsName("Punch2") &&
+        if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch2") &&
             animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.9f)
         {
             Debug.Log("ComboAttack_End");
