@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,7 +10,10 @@ public class CharacterMovement : MonoBehaviour
     private bool isMove;
     private bool isAttacking;
     private bool isComboAttacking;
+    private bool isRolling;
     private float playerRotationSpeed;
+    private float playerRollingDistance;
+    private int floorLayerIndex;
 
     void Awake()
     {
@@ -22,6 +23,8 @@ public class CharacterMovement : MonoBehaviour
 
         agent.updateRotation = false;
         playerRotationSpeed = 10f;
+        playerRollingDistance = 10f;
+        floorLayerIndex = 1 << LayerMask.NameToLayer("Floor");
     }
 
     // Start is called before the first frame update
@@ -36,7 +39,7 @@ public class CharacterMovement : MonoBehaviour
         if (Input.GetMouseButton(1))
         {
             RaycastHit hit;
-            if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit))
+            if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit, 1000f, floorLayerIndex))
             {
                 SetDestination(hit.point);
             }
@@ -45,6 +48,7 @@ public class CharacterMovement : MonoBehaviour
         LookMoveDireciton();
         Attack();
         ComboAttack();
+        Roll();
     }
 
     private void SetDestination(Vector3 dest)
@@ -58,7 +62,7 @@ public class CharacterMovement : MonoBehaviour
     {
         if (isMove)
         {
-            if (agent.velocity.magnitude == 0f)
+            if (Vector3.Distance(animator.transform.position, agent.destination) < 0.001f) // 속력이 아닌 도착했느냐에 따라 결정
             {
                 isMove = false;
                 animator.SetBool("isMove", false);
@@ -72,9 +76,9 @@ public class CharacterMovement : MonoBehaviour
 
     private void Attack()
     {
+        Debug.Log($"{animator.transform.forward}");
         if (Input.GetMouseButtonDown(0))
         {
-            Debug.Log("Attacking");
             isAttacking = true;
             animator.SetBool("isAttacking", true);
         }
@@ -82,7 +86,6 @@ public class CharacterMovement : MonoBehaviour
         if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch1") &&
             animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.9f)
         {
-            Debug.Log("Attack_End");
             isAttacking = false;
             isComboAttacking = false;
             animator.SetBool("isAttacking", false);
@@ -97,7 +100,6 @@ public class CharacterMovement : MonoBehaviour
             animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.1f &&
             animator.GetCurrentAnimatorStateInfo(1).normalizedTime <= 0.9f)
         {
-            Debug.Log("ComboAttacking");
             isComboAttacking = true;
             animator.SetBool("isComboAttacking", true);
         }
@@ -105,11 +107,23 @@ public class CharacterMovement : MonoBehaviour
         if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch2") &&
             animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.9f)
         {
-            Debug.Log("ComboAttack_End");
             isAttacking = false;
             isComboAttacking = false;
             animator.SetBool("isAttacking", false);
             animator.SetBool("isComboAttacking", false);
         }
+    }
+
+    private void Roll()
+    {
+        //if (!isAttacking && !isComboAttacking)
+        //{
+        //    Debug.Log("Rolling");
+        //    isRolling = true;
+        //    isMove = false;
+        //    animator.SetBool("isMove", false);
+
+        //    animator.transform.position = Quaternion.Lerp(animator.transform.position, animator.transform.forward)
+        //}
     }
 }
