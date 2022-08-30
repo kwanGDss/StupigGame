@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 public class CharacterMovement : MonoBehaviour
 {
-    private Camera camera;
+    public new Camera camera;
     private Animator animator;
     private NavMeshAgent agent;
 
@@ -17,7 +17,6 @@ public class CharacterMovement : MonoBehaviour
 
     void Awake()
     {
-        camera = Camera.main;
         animator = GetComponentInChildren<Animator>();
         agent = GetComponent<NavMeshAgent>();
 
