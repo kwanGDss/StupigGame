@@ -75,7 +75,6 @@ public class CharacterMovement : MonoBehaviour
 
     private void Attack()
     {
-        Debug.Log($"{animator.transform.forward}");
         if (Input.GetMouseButtonDown(0))
         {
             isAttacking = true;

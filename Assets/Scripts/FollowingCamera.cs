@@ -5,13 +5,16 @@ using UnityEngine;
 public class FollowingCamera : MonoBehaviour
 {
     public Transform target;
+
     private Vector3 cameraOffsetPosition;
-    private Vector3 cameraOffsetRotatiton;
+    private float cameraYAxisRotatiton;
+    private float cameraRotationSpeed;
 
     private void Awake()
     {
-        cameraOffsetPosition = new Vector3(0.0f, 6.5f, -9.25f);
-        cameraOffsetRotatiton = new Vector3(15.0f, 0.0f, 0.0f);
+        //cameraOffsetPosition = new Vector3(0.0f, 5.0f, -9.25f);
+        cameraOffsetPosition = transform.position - target.position;
+        cameraRotationSpeed = 45.0f;
     }
 
     // Start is called before the first frame update
@@ -24,6 +27,18 @@ public class FollowingCamera : MonoBehaviour
     void Update()
     {
         transform.position = target.position + cameraOffsetPosition;
-        //transform.rotation = target.rotation * Quaternion.Euler(cameraOffsetRotatiton);
+
+        if (Input.GetKey(KeyCode.A))
+        {
+            Debug.Log($"{target.position}");
+            transform.RotateAround(target.position, Vector3.up, cameraRotationSpeed * Time.deltaTime);
+        }
+        else if (Input.GetKey(KeyCode.D))
+        {
+            Debug.Log($"{target.position}");
+            transform.RotateAround(target.position, Vector3.up, -cameraRotationSpeed * Time.deltaTime);
+        }
+
+        cameraOffsetPosition = transform.position - target.position;
     }
 }
