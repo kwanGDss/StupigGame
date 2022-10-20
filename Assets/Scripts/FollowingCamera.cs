@@ -17,10 +17,10 @@ public class FollowingCamera : MonoBehaviour
     {
         //cameraOffsetPosition = new Vector3(0.0f, 5.0f, -9.25f);
         OffsetPosition = transform.position - target.position;
-        RotationSpeed = 45.0f;
+        RotationSpeed = 75.0f;
 
         zoomDirection = 0.0f;
-        zoomSpeed = 250.0f;
+        zoomSpeed = 500.0f;
         zoomMaxValue = 3.0f;
         zoomMinValue = 6.5f;
     }
@@ -57,7 +57,6 @@ public class FollowingCamera : MonoBehaviour
     void ZoomCamera()
     {
         zoomDirection = Input.GetAxis("Mouse ScrollWheel");
-        Debug.Log($"{zoomDirection}");
 
         if (transform.position.y <= zoomMaxValue && zoomDirection > 0)
         {
@@ -69,7 +68,6 @@ public class FollowingCamera : MonoBehaviour
         }
 
         transform.position += transform.forward * zoomDirection * zoomSpeed * Time.deltaTime;
-
         OffsetPosition = transform.position - target.position;
     }
 }

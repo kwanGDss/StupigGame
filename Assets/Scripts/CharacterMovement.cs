@@ -11,9 +11,10 @@ public class CharacterMovement : MonoBehaviour
     private bool isAttacking;
     private bool isComboAttacking;
     private bool isRolling;
-    private float playerRotationSpeed;
-    private float playerRollingDistance;
+    private float RotationSpeed;
     private int floorLayerIndex;
+    private float RollingDistance;
+    private Vector3 dir;
 
     void Awake()
     {
@@ -21,9 +22,9 @@ public class CharacterMovement : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
 
         agent.updateRotation = false;
-        playerRotationSpeed = 10f;
-        playerRollingDistance = 10f;
+        RotationSpeed = 10.0f;
         floorLayerIndex = 1 << LayerMask.NameToLayer("Floor");
+        RollingDistance = 10.0f;
     }
 
     // Start is called before the first frame update
@@ -35,54 +36,59 @@ public class CharacterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButton(1))
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit, 1000f, floorLayerIndex))
-            {
-                SetDestination(hit.point);
-            }
-        }
-
+        Move();
         LookMoveDireciton();
         Attack();
         ComboAttack();
         Roll();
+
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            Debug.Log($"{agent.destination}");
+        }
     }
 
-    private void SetDestination(Vector3 dest)
+    private void Move()
     {
-        agent.SetDestination(dest);
-        isMove = true;
-        animator.SetBool("isMove", true);
+        if (Input.GetMouseButton(1) && !isRolling)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(camera.ScreenPointToRay(Input.mousePosition), out hit, 1000.0f, floorLayerIndex))
+            {
+                agent.SetDestination(hit.point);
+                isMove = true;
+                animator.SetBool("isMove", true);
+            }
+        }
     }
 
     private void LookMoveDireciton()
     {
         if (isMove)
         {
-            if (Vector3.Distance(animator.transform.position, agent.destination) < 0.001f) // 속력이 아닌 도착했느냐에 따라 결정
+            //if (Vector3.Distance(animator.transform.position, agent.destination) <= float.Epsilon) // 속력이 아닌 도착했느냐에 따라 결정
+            if (agent.velocity.magnitude == 0f) // 속력이 아닌 도착했느냐에 따라 결정
             {
                 isMove = false;
                 animator.SetBool("isMove", false);
                 return;
             }
 
-            var dir = new Vector3(agent.steeringTarget.x, transform.position.y, agent.steeringTarget.z) - transform.position;
-            animator.transform.rotation = Quaternion.Lerp(animator.transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * playerRotationSpeed);
+            dir = new Vector3(agent.steeringTarget.x, transform.position.y, agent.steeringTarget.z) - transform.position;
+            animator.transform.rotation = Quaternion.Lerp(animator.transform.rotation, Quaternion.LookRotation(dir), Time.deltaTime * RotationSpeed);
         }
     }
 
     private void Attack()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButtonDown(0) && !isRolling)
         {
             isAttacking = true;
             animator.SetBool("isAttacking", true);
         }
 
         if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch1") &&
-            animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.9f)
+            animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.8f)
         {
             isAttacking = false;
             isComboAttacking = false;
@@ -96,14 +102,14 @@ public class CharacterMovement : MonoBehaviour
         if (Input.GetMouseButtonDown(0) &&
             animator.GetCurrentAnimatorStateInfo(1).IsName("Punch1") &&
             animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.1f &&
-            animator.GetCurrentAnimatorStateInfo(1).normalizedTime <= 0.9f)
+            animator.GetCurrentAnimatorStateInfo(1).normalizedTime <= 0.8f)
         {
             isComboAttacking = true;
             animator.SetBool("isComboAttacking", true);
         }
 
         if (animator.GetCurrentAnimatorStateInfo(1).IsName("Punch2") &&
-            animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.9f)
+            animator.GetCurrentAnimatorStateInfo(1).normalizedTime >= 0.8f)
         {
             isAttacking = false;
             isComboAttacking = false;
@@ -114,14 +120,25 @@ public class CharacterMovement : MonoBehaviour
 
     private void Roll()
     {
-        //if (!isAttacking && !isComboAttacking)
-        //{
-        //    Debug.Log("Rolling");
-        //    isRolling = true;
-        //    isMove = false;
-        //    animator.SetBool("isMove", false);
+        if (!isAttacking && !isComboAttacking && !isRolling && Input.GetKey(KeyCode.Space))
+        {
+            Debug.Log("Rolling");
+            isRolling = true;
+            isMove = false;
+            animator.SetBool("isRolling", true);
+            animator.SetBool("isMove", false);
 
-        //    animator.transform.position = Quaternion.Lerp(animator.transform.position, animator.transform.forward)
-        //}
+            animator.transform.position = Vector3.Lerp(animator.transform.position, animator.transform.forward * RollingDistance, Time.deltaTime * 0.1f);
+        }
+
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("RollForward") &&
+            animator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f)
+        {
+            Debug.Log("Rolling End");
+            isRolling = false;
+            animator.SetBool("isRolling", false);
+
+            agent.SetDestination(agent.transform.position);
+        }
     }
 }
