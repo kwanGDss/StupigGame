@@ -6,6 +6,7 @@ public class CharacterMovement : MonoBehaviour
     public new Camera camera;
     private Animator animator;
     private NavMeshAgent agent;
+    private Rigidbody rigidBody;
 
     private bool isMove;
     private bool isAttacking;
@@ -64,10 +65,10 @@ public class CharacterMovement : MonoBehaviour
 
     private void LookMoveDireciton()
     {
+        Debug.Log($"{agent.velocity.magnitude}");
         if (isMove)
         {
-            //if (Vector3.Distance(animator.transform.position, agent.destination) <= float.Epsilon) // 속력이 아닌 도착했느냐에 따라 결정
-            if (agent.velocity.magnitude == 0f) // 속력이 아닌 도착했느냐에 따라 결정
+            if (agent.velocity.magnitude == 0f && agent.remainingDistance <= 0.5f)
             {
                 isMove = false;
                 animator.SetBool("isMove", false);
@@ -139,6 +140,14 @@ public class CharacterMovement : MonoBehaviour
             animator.SetBool("isRolling", false);
 
             agent.SetDestination(agent.transform.position);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Monster"))
+        {
+            Debug.Log("coll");
         }
     }
 }
