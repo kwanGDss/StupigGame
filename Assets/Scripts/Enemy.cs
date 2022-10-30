@@ -25,10 +25,7 @@ public class Enemy : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            hp -= 10.0f;
-        }
+
     }
 
     private void Dead()
@@ -37,5 +34,10 @@ public class Enemy : MonoBehaviour
         {
             Debug.Log("Dead");
         }
+    }
+    
+    public void TakeDamage(float damage)
+    {
+        hp -= damage;
     }
 }

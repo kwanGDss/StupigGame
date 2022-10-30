@@ -148,6 +148,7 @@ public class CharacterMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Monster"))
         {
             Debug.Log("coll");
+            collision.gameObject.GetComponent<Enemy>().TakeDamage(5f);
         }
     }
 }
